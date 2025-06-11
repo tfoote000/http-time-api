@@ -11,6 +11,7 @@ GET /times?tz=America/Denver,Europe/London
 
 ## File Structure
 
+```yaml
 time-api/
 ├── README.md
 ├── requirements.txt
@@ -24,6 +25,7 @@ time-api/
 └── systemd/
 ├── time-api.env
 └── time-api.service
+```
 
 ## Quickstart (Python + venv)
 
