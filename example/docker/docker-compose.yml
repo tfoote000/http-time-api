@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  time-api:
+    build: ../../
+    environment:
+      - PORT=8463
+    ports:
+      - "8463:8463"
+    restart: unless-stopped
