@@ -7,99 +7,128 @@ A tiny FastAPI service that returns:
 
 Supports multiple zones in one call:
 
-GET /times?tz=America/Denver,Europe/London
+```
+
+GET /times?tz=America/Denver\&tz=Europe/London
+
+```
+
+> **Note:** If you omit `tz`, it defaults to `UTC`.
+
+---
 
 ## File Structure
 
-```yaml
+```text
 time-api/
 ├── README.md
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
 ├── app/
-│ └── main.py
+│   └── main.py
 └── example/
-├── docker/
-│ └── docker-compose.yml
-└── systemd/
-├── time-api.env
-└── time-api.service
+    ├── docker/
+    │   └── docker-compose.yml
+    └── systemd/
+        ├── time-api.env
+        └── time-api.service
 ```
+
+---
 
 ## Quickstart (Python + venv)
 
 1. **Create and activate venv**
 
-```bash
+   ```bash
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
-```
+   ```
 
 2. **Run**
 
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8463
-```
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port 8463
+   ```
 
 3. **Test**
 
-```bash
-curl "http://localhost:8463/times?tz=UTC,America/Denver"
-```
+   ```bash
+   # single zone (defaults to UTC if you leave out tz=)
+   curl "http://localhost:8463/times"
+
+   # multiple zones
+   curl "http://localhost:8463/times?tz=UTC&tz=America/Denver"
+   ```
+
+---
 
 ## Docker
 
 1. **Build**
 
-```bash
-docker build -t time-api:latest .
-```
+   ```bash
+   docker build -t time-api:latest .
+   ```
 
 2. **Run**
 
-```bash
-docker run -d --name time-api -e PORT=8463 -p 8463:8463 time-api:latest
-```
+   ```bash
+   docker run -d \
+     --name time-api \
+     -e PORT=8463 \
+     -p 8463:8463 \
+     time-api:latest
+   ```
 
 3. **Or compose**
 
-```bash
-docker-compose up -d
-```
+   ```bash
+   docker-compose up -d
+   ```
+
+---
 
 ## Systemd (no Docker)
 
-1. Install venv & deps in /home/pi/time-api
+1. **Install** venv & deps in `/home/pi/time-api`
 
-2. (Optional) Create /etc/time-api.env to override:
+2. **(Optional)** Create `/etc/time-api.env` to override defaults:
 
-```ini
-PORT=8000
-```
+   ```ini
+   PORT=8000
+   ```
 
-3. Drop `example/systemd/time-api.service` → `/etc/systemd/system/time-api.service`
+3. **Deploy** the service file:
 
-4. Enable & start
+   ```bash
+   sudo cp example/systemd/time-api.service /etc/systemd/system/time-api.service
+   sudo systemctl daemon-reload
+   sudo systemctl enable time-api
+   sudo systemctl start time-api
+   sudo journalctl -u time-api -f
+   ```
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable time-api
-sudo systemctl start time-api
-sudo journalctl -u time-api -f
-```
+4. **Test**
 
-5. Test
+   ```bash
+   # default (UTC)
+   curl "http://<nano-pi-ip>:8463/times"
 
-```bash
-curl "http://<nano-pi-ip>:8463/times?tz=Asia/Tokyo,Europe/London"
-```
+   # multiple zones
+   curl "http://<nano-pi-ip>:8463/times?tz=Asia/Tokyo&tz=Europe/London"
+   ```
+
+---
 
 ## Environment Variables
 
-- PORT (default 8463) — port for UVicorn
-- (you can add more in /etc/time-api.env and reference them in the systemd unit)
+- `PORT` (default **8463**) — port for Uvicorn
+- _(You can add more in `/etc/time-api.env` and reference them in the systemd unit.)_
+
+---
 
 ## License & Contributing
 
