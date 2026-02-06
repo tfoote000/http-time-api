@@ -1,0 +1,48 @@
+[Unit]
+Description=Time API - High-performance time service with GPS PPS
+Documentation=https://github.com/tfoote000/http-time-api
+After=network.target chrony.service
+Wants=chrony.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/time-api-rust
+
+# Load environment variables
+EnvironmentFile=-/etc/time-api.env
+
+# Run the binary
+ExecStart=/home/pi/time-api-rust/time-api
+
+# Restart on failure
+Restart=on-failure
+RestartSec=5s
+
+# Resource limits
+MemoryMax=50M
+MemoryHigh=40M
+TasksMax=100
+LimitNOFILE=4096
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log/time-api
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=time-api
+
+[Install]
+WantedBy=multi-user.target
